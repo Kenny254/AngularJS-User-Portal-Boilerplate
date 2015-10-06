@@ -3,7 +3,7 @@ An AngularJS Boilerplate with basic features such as registration, login, forgot
 
 [**View the DEMO**](http://ajs-user-portal.inovacode.com/client)
 
-![ScreenShot](http://inovacode.com/images/screenshots/ajs-user-portal.png)
+![ScreenShot](http://inovacode.com/images/screenshots/ajs-user-portal_sm.png)
 
 Some basic ground work has already done for you like:
   - App architecture
