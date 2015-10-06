@@ -1,6 +1,8 @@
 # AngularJS-User-Portal-Boilerplate
 An AngularJS Boilerplate with basic features such as registration, login, forgot password, profile, dashboard, ect . . .
 
+[**View the DEMO**](http://ajs-user-portal.inovacode.com/client)
+
 Some basic ground work has already done for you like:
   - App architecture
   - Necessary JavaScript libraries
