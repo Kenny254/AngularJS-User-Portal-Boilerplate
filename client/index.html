@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>User Portal</title>
+
+    <link href="assets/css/style-bundle.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="assets/img/favicon.ico">
+
+    <!-- HTML5 shim and Respond.js for IE support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body ng-controller="baseCtrl" ng-class="{ 'login-body': !isAuthenticated }">
+
+    <section id="container" ng-class="{ 'sidebar-closed': isSidebarClosed }">
+        <div ng-include="'common/layout/header.tpl.html'" ng-show="isAuthenticated"></div>
+        <div ng-include="'common/layout/sidebar.tpl.html'" ng-show="isAuthenticated"></div>
+
+        <section id="main-content">
+            <a id="scrollTop">.</a>
+            <section class="wrapper">
+                <div class="row col-md-12 ml">
+                    <div ng-view class="conent-view ajs-fade-animation"></div>
+                </div>
+            </section>
+        </section>
+
+        <div ng-include="'common/layout/footer.tpl.html'" ng-show="isAuthenticated"></div>
+    </section>
+
+    <!-- scripts -->
+    <script src="vendor/vendor-bundle.js"></script>
+    <script src="app/app-bundle.js"></script>
+</body>
+</html>

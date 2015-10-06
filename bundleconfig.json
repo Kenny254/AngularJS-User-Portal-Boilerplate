@@ -1,0 +1,47 @@
+/*
+   The Visual Studio "Bundler & Minifier" plugin
+   Source:  https://visualstudiogallery.msdn.microsoft.com/9ec27da7-e24b-4d56-8064-fd7e88ac1c40
+*/
+
+[
+  // CSS
+  {
+    "outputFileName": "client/assets/css/style-bundle.css",
+    "inputFiles": [
+      "client/vendor/bootstrap/bootstrap.min.css",
+      "client/vendor/font-awesome/css/font-awesome.css",
+      "client/vendor/fonts/ruda-font.css",
+      "client/assets/css/style.css"
+    ]
+  },
+  // JavaScript
+  {
+    "outputFileName": "client/vendor/vendor-bundle.js",
+    "inputFiles": [
+      // vendor
+      "client/vendor/jquery/jquery.min.js",
+      "client/vendor/bootstrap/bootstrap.min.js",
+      "client/vendor/angular/angular.min.js",
+      "client/vendor/angular/angular-route.min.js",
+      "client/vendor/angular/angular-animate.min.js",
+      "client/vendor/bootstrap/ui-bootstrap-tpls-0.13.4.min.js"
+    ]
+  },
+  {
+    "outputFileName": "client/app/app-bundle.js",
+    "inputFiles": [
+      // app
+      "client/app/app.js",
+      "client/app/routes.js",
+      "client/app/dashboard/dashboard.js",
+      "client/app/account/profile.js",
+      "client/app/account/register.js",
+
+      // common
+      "client/common/security/security.js",
+      "client/common/security/login/login.js",
+      "client/common/services/utilities.js",
+      "client/common/templates/modalmessage.js"
+    ]
+  }
+]
