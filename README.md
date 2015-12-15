@@ -1,7 +1,7 @@
 # AngularJS-User-Portal-Boilerplate
 An AngularJS Boilerplate with basic features such as registration, login, forgot password, profile, dashboard, ect . . .
 
-[**View the DEMO**](http://ajs-user-portal.inovacode.com/client)
+[**View the DEMO**](http://inovacode.com/client)
 
 ![ScreenShot](http://inovacode.com/images/screenshots/ajs-user-portal_sm.png)
 
