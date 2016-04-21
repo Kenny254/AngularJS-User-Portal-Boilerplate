@@ -1,372 +1,519 @@
-var app = angular.module('app', ['ngRoute', 'ngAnimate', 'ui.bootstrap']);
+/*************************************************************************************
+Angular Application Main module configuration Start
+*************************************************************************************/
+'use strict';
 
-app.run(['security.service', function (security) {
-    // Get the current user when the application starts (in case they are still logged in from a previous session)
-    security.requestCurrentUser();
-}]);
+angular.module('app', ['ngRoute', 'ngAnimate', 'ui.bootstrap']);
 
-app.controller('baseCtrl', ['$scope', 'security.service', 'services.utilities',
-  function ($scope, security, utils) {
-      $scope.logoText = 'USER PORTAL';
-      $scope.currentYear = new Date().getFullYear();
-      $scope.isSidebarClosed = false;
-      $scope.settingsLinkGroup = false;
-      $scope.currentUser = security.requestCurrentUser();
-      $scope.isAuthenticated = security.isAuthenticated();
-      $scope.logout = function () { security.logout(); };
-      $scope.gotoTop = function () { utils.anchorScroll('scrollTop'); };
+(function (app) {
+    app.run(['securityService', function (security) {
+        // Get the current user when the application starts (in case they are still logged in from a previous session)
+        security.getCurrentUser();
+    }]);
 
-      if (utils.pageWidth < 768) {
-          $scope.isSidebarClosed = true;
-      }
+    /***********  Base Controller Start ***********/
 
-      $scope.toggleSidebar = function () {
-          if ($scope.isSidebarClosed) {
-              $scope.isSidebarClosed = false;
-          } else {
-              $scope.isSidebarClosed = true;
-          }
-      };
+    app.controller('baseController', baseController);
+    baseController.$inject = ['$scope', '$window', 'securityService', 'commonService'];
 
-      // register listener to watch route changes
-      $scope.$on('$routeChangeStart', function (event, next, current) {
-          $scope.isAuthenticated = security.isAuthenticated();
+    function baseController($scope, $window, security, commonService) {
+        var vm = this;
 
-          if (!security.isAuthenticated() && next.$$route.originalPath.indexOf('login') == -1) {
-              utils.navigateTo('/login');
-              return;
-          } else {
-              $scope.currentUser = security.requestCurrentUser();
-          }
+        function init() {
+            vm.logoText = 'USER PORTAL';
+            vm.currentYear = new Date().getFullYear();
+            vm.isSidebarClosed = false;
+            vm.settingsLinkGroup = false;
+            vm.defaultProfileImage = commonService.APP_CONFIG.DEFAULT_USER_IMG;
+            vm.currentUser = security.getCurrentUser();
+            vm.isAuthenticated = security.isAuthenticated();
+            vm.logout = function () { security.logout(); };
+            vm.gotoTop = function () { commonService.anchorScroll('scrollTop'); };
 
-          // Set the Sidebar Nav active styles based on current page
-          if (next && next.$$route && next.$$route.originalPath) {
-
-              // Reset every time
-              $scope.activateDashboardNav = $scope.activateSettingsNav = $scope.settingsLinkGroup =
-              $scope.activateSampleSubNav = $scope.activateSample2SubNav = false;
-
-              switch (next.$$route.originalPath) {
-                  case '/sample':
-                      $scope.activateSettingsNav = $scope.settingsLinkGroup = $scope.activateSampleSubNav = true;
-                      break;
-                  case '/sample2':
-                      $scope.activateSettingsNav = $scope.settingsLinkGroup = $scope.activateSample2SubNav = true;
-                      break;
-                  default:
-                      $scope.activateDashboardNav = true;
-                      break;
-              }
-          }
-      });
-  }
-]);
-
-app.animation('.ajs-fade-animation', function () {
-    return {
-        enter: function (element, done) {
-            element.css('display', 'none');
-            element.fadeIn(500, done);
-            return function () {
-                element.stop();
+            if ($window.innerWidth < 768) {
+                vm.isSidebarClosed = true;
             }
-        },
-        leave: function (element, done) {
-            element.fadeOut(500, done)
-            return function () {
-                element.stop();
+        }
+
+        vm.toggleSidebar = function () {
+            if (vm.isSidebarClosed) {
+                vm.isSidebarClosed = false;
+            } else {
+                vm.isSidebarClosed = true;
+            }
+        };
+
+        init();
+
+        // register listener to watch route changes
+        $scope.$on('$routeChangeStart', function (event, next, current) {
+            vm.isAuthenticated = security.isAuthenticated();
+
+            if (!security.isAuthenticated() && next.$$route.originalPath.indexOf('login') == -1) {
+                commonService.navigateTo('/login');
+                return;
+            } else {
+                vm.currentUser = security.getCurrentUser();
+            }
+
+            // Set the Sidebar Nav active styles based on current page
+            if (next && next.$$route && next.$$route.originalPath) {
+
+                // Reset every time
+                vm.activateDashboardNav = vm.activateSettingsNav = vm.settingsLinkGroup =
+                vm.activateSampleSubNav = vm.activateSample2SubNav = false;
+
+                switch (next.$$route.originalPath) {
+                    case '/sample':
+                        vm.activateSettingsNav = vm.settingsLinkGroup = vm.activateSampleSubNav = true;
+                        break;
+                    case '/sample2':
+                        vm.activateSettingsNav = vm.settingsLinkGroup = vm.activateSample2SubNav = true;
+                        break;
+                    default:
+                        vm.activateDashboardNav = true;
+                        break;
+                }
+            }
+        });
+    }
+
+    /***********  Base Controller End ***********/
+
+    app.animation('.ajs-fade-animation', function () {
+        return {
+            enter: function (element, done) {
+                element.css('display', 'none');
+                element.fadeIn(500, done);
+                return function () {
+                    element.stop();
+                }
+            },
+            leave: function (element, done) {
+                element.fadeOut(500, done)
+                return function () {
+                    element.stop();
+                }
+            }
+        }
+    });
+
+})(angular.module('app'));
+angular.module('app')
+    .constant('APP_CONFIG',
+    {
+        DEFAULT_USER_IMG: 'content/img/avatar.jpg'
+    });
+
+(function () {
+    /***********************************************************
+    Route configuration Start    
+    ***********************************************************/
+    angular.module('app').config(['$routeProvider', routeConfig]);
+
+    function routeConfig($routeProvider) {
+        $routeProvider
+          .when('/', { templateUrl: 'app/views/dashboard/dashboard.tpl.html', controller: 'dashboardController', controllerAs: 'vm' })
+          .when('/login', { templateUrl: 'app/views/account/security/login/login.tpl.html', controller: 'loginController', controllerAs: 'vm' })
+          .when('/profile', { templateUrl: 'app/views/account/profile/profile.tpl.html', controller: 'profileController', controllerAs: 'vm' })
+          .when('/sample', { templateUrl: 'app/views/sample/sample.tpl.html' })
+          .when('/sample2', { templateUrl: 'app/views/sample/sample2.tpl.html' })
+          .otherwise({
+              redirectTo: '/'
+          });
+    }
+    /***********************************************************
+    Route configuration End
+    ***********************************************************/
+})();
+angular
+  .module('app')
+  .filter('cmdate', ['$filter', function ($filter) {
+      return function (input, format) {
+          return $filter('date')(new Date(input), format);
+      };
+  }]);
+(function () {
+    angular
+        .module('app')
+        .factory('commonService', commonService);
+
+    commonService.$inject = ['$rootScope', '$q', '$window', '$location',  '$anchorScroll', '$modal', 'APP_CONFIG'];
+
+    function commonService($rootScope, $q, $window, $location, $anchorScroll, $modal, APP_CONFIG) {
+        var rootLocationPath = '/#';
+
+        return {
+            APP_CONFIG: APP_CONFIG,
+            navigateTo: navigateTo,
+            pageRedirect: pageRedirect,
+            goBack: goBack,
+            anchorScroll: anchorScroll,
+            setDeferredPromise: setDeferredPromise,
+            showModalMessage: showModalMessage,
+            handleApiError: handleApiError,
+            setQueryStringValue: setQueryStringValue,
+            getQueryStringValue: getQueryStringValue
+        };
+
+        function navigateTo(path) {
+            $location.path(path);
+        }
+
+        function pageRedirect(path) {
+            if (path)
+                $window.location.href = path;
+            else
+                $window.location.href = rootLocationPath + $location.$$path;
+        }
+
+        function goBack() {
+            $window.history.back();
+        }
+
+        function anchorScroll(anchor) {
+            $location.hash(anchor);
+            $scroll();
+        }
+
+        function setDeferredPromise(object) {
+            var deferred = $q.defer();
+            deferred.resolve(object);
+            return deferred.promise;
+        }
+
+        function showModalMessage(message, type, title, size) {
+            $rootScope.modalTitle = title;
+            $rootScope.modalMessage = message;
+            $rootScope.type = type; // warning, danger, (theme default)
+            size = (!size) ? '' : size;
+
+            var modalInstance = $modal.open({
+                scope: $rootScope,
+                templateUrl: '/client/app/views/common/modalMessage/modalMessage.tpl.html',
+                controller: 'modalMessageCtrl',
+                backdrop: 'static', // makes it truly modal so clicks outside the modal don't close it
+                size: size // sm, md, lg
+            });
+        }
+
+        function handleApiError(response) {
+            if (response) {
+                var errorMsg = response.statusText + ' (Error Code: ' + response.status + ')';
+                if (response.data !== null && response.data.message !== null) {
+                    errorMsg += '<br/><br/>' + response.data.message;
+                }
+
+                showModalMessage(errorMsg, 'danger', 'Failure');
+                console.log(errorMsg);
+            }
+        }
+
+        function setQueryStringValue(name, value) {
+            $location.search(name, value);
+        }
+
+        function getQueryStringValue(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)'),
+                results = regex.exec($location.absUrl().replace('#', ''));
+
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+    }
+})();
+(function () {
+    angular
+        .module('app')
+        .factory('securityService', securityService);
+
+    securityService.$inject = ['$http', 'commonService'];
+
+    function securityService($http, commonService) {
+        var currentUser = null; // Information about the current user
+
+        return {
+            login: login,
+            logout: logout,
+            sendPswdRecoveryEmail: sendPswdRecoveryEmail,
+            getCurrentUser: getCurrentUser,
+            isAuthenticated: isAuthenticated
+        };
+
+        // Attempt to authenticate a user by the given email and password
+        function login(email, password) {
+            // ToDo: call API
+            //$http.post('/login', { email: email, password: password });
+
+            return $http.get('test/sampleData/user.json')
+                .then(function success(response) {
+                    currentUser = response.data;
+                    if (isAuthenticated()) {
+                        commonService.navigateTo('#/');
+                    }
+                    return isAuthenticated();
+                },
+                function error(response) {
+                    commonService.handleApiError(response);
+                    return false;
+                });
+        }
+
+        // Logout the current user and redirect
+        function logout() {
+            // ToDo: call API
+            //$http.post('/logout').then(function () {
+            currentUser = null;
+            commonService.navigateTo('/login');
+            //});
+        }
+
+        function sendPswdRecoveryEmail(email) {
+            return true;
+            // ToDo: call API
+            //$http.get('/password-recovery', { email: email })
+        }
+
+        // Ask the backend to see if a user is already authenticated - this may be from a previous session.
+        function getCurrentUser() {
+            if (isAuthenticated()) {
+                return currentUser;
+            }
+            // ToDo:
+            //else {
+            //    return $http.get('/current-user').then(function (response) {
+            //        currentUser = response.data.user;
+            //        return currentUser;
+            //    });
+            //}
+        }
+
+        // Is the current user authenticated?
+        function isAuthenticated() {
+            return !!currentUser;
+        }
+    }
+})();
+(function (app) {
+    'use strict';
+
+    app.controller('profileController', profileController);
+    profileController.$inject = ['securityService'];
+
+    function profileController(security) {
+        var vm = this;
+
+        function init() {
+            vm.user = security.getCurrentUser();
+        }
+
+        init();
+    }
+})(angular.module('app'));
+(function (app) {
+    'use strict';
+
+    app.controller('registerController', registerController);
+    registerController.$inject = ['$scope', 'registerService', '$modalInstance'];
+
+    function registerController($scope, registerService, $modalInstance) {
+
+        function init() {
+            $scope.user = {};
+        }
+
+        $scope.register = function () {
+            $scope.dataLoading = true;
+
+            if (registerService.createUser($scope.user)) {
+                $scope.registerMsg = 'Your account has been created! You can now login.';
+                $scope.registerMsgClass = 'alert-success';
+            } else {
+                $scope.registerMsg = 'Registration failed. Please try again.';
+                $scope.registerMsgClass = 'alert-danger';
+                $scope.dataLoading = false;
+            }
+        };
+
+        $scope.close = function () {
+            $modalInstance.close();
+        };
+
+        init();
+    }
+})(angular.module('app'));
+
+
+// *Note: separate this service to it's own file 'register.service.js' after adding more code.
+(function () {
+    angular
+        .module('app')
+        .factory('registerService', registerService);
+
+    registerService.$inject = ['$http', 'commonService'];
+
+    function registerService($http, commonService) {
+
+        return {
+            createUser: createUser
+        };
+
+        function createUser(user) {
+            if (user && user.email && user.password) {
+                return true;
+                // ToDo:
+                //$http.post('/create-user', { user: user })
+                //    .then(function success(response) {
+                //        return true;
+                //    },
+                //    function error(response) {
+                //        commonService.handleApiError(response);
+                //        return false;
+                //    });
             }
         }
     }
-});
-app.config(['$routeProvider',
-  function ($routeProvider) {
-      $routeProvider
-      .when('/', { templateUrl: 'app/dashboard/dashboard.tpl.html', controller: 'dashboardCtrl' })
-      .when('/login', { templateUrl: 'common/security/login/login.tpl.html', controller: 'loginCtrl' })
-      .when('/profile', { templateUrl: 'app/account/profile.tpl.html', controller: 'profileCtrl' })
-      .when('/sample', { templateUrl: 'app/sample/sample.tpl.html' })
-      .when('/sample2', { templateUrl: 'app/sample/sample2.tpl.html' })
-      .otherwise({
-          redirectTo: '/'
-      });
-  }
-]);
-angular.module('app').controller('dashboardCtrl', ['$scope', 'dashboardService', 'security.service',
-  function ($scope, svc, security) {
-      $scope.title = 'Welcome to the User Portal AngularJS Boilerplate!';
-      $scope.user = security.requestCurrentUser();
+})();
+(function (app) {
+    'use strict';
 
-      svc.getDashData($scope.user.userId).then(function (d) {
-          $scope.dashData = d;
-      }); 
-  }
-]);
+    app.controller('loginController', loginController);
+    loginController.$inject = ['securityService', '$modal'];
+
+    function loginController(security, $modal) {
+        var vm = this;
+
+        function init() {
+            $('#loginModal').modal('show');
+            vm.forgotPass = {};
+
+            vm.user = {
+                email: 'fake@myemail.com',  // ToDo: remove
+                password: 'pa$$word'  // ToDo: remove
+            };
+        }
+
+        vm.login = function () {
+            vm.dataLoading = true;
+
+            security.login(vm.user.email, vm.user.password)
+                .then(function (response) {
+                    if (response && response.data) {
+                        $('#loginModal').modal('hide');
+                    }
+                }, function (error) {
+                    vm.loginMsg = 'Login failed. Please try again.';
+                    vm.dataLoading = false;
+                });
+        };
+
+        vm.forgotPassword = function () {
+            if (security.sendPswdRecoveryEmail(vm.forgotPass.email)) {
+                vm.forgotPassMsg = 'A password recovery email has been sent.';
+                vm.forgotPassMsgClass = 'alert-success';
+            } else {
+                vm.forgotPassMsg = 'Form submission error. Please try again.';
+                vm.forgotPassMsgClass = 'alert-danger';
+            }
+        };
+
+        vm.openRegister = function () {
+            var modalInstance = $modal.open({
+                //scope: $scope,
+                templateUrl: '/client/app/views/account/register/register.tpl.html',
+                controller: 'registerController'
+            });
+        };
+
+        init();
+    }
+})(angular.module('app'));
+(function (app) {
+    'use strict';
+
+    app.controller('modalMessageCtrl', modalMessageCtrl);
+    modalMessageCtrl.$inject = ['$scope', '$modalInstance'];
+
+    function modalMessageCtrl($scope, $modalInstance) {
+
+        function init() {
+            switch ($scope.type) {
+                case 'warning':
+                    $scope.modalContentClass = 'alert-warning';
+                    $scope.modalHeaderClass = 'modal-header-warning';
+
+                    if (!$scope.modalTitle)
+                        $scope.modalTitle = "Warning";
+                    break;
+                case 'danger':
+                    $scope.modalContentClass = 'alert-danger';
+                    $scope.modalHeaderClass = 'modal-header-danger';
+
+                    if (!$scope.modalTitle)
+                        $scope.modalTitle = "Error";
+                    break;
+                default:
+                    if (!$scope.modalTitle)
+                        $scope.modalTitle = "Information";
+                    break;
+            }
+        }
+
+        $scope.close = function () {
+            $modalInstance.close();
+        };
+
+        init();
+    }
+})(angular.module('app'));
+(function (app) {
+    'use strict';
+
+    app.controller('dashboardController', dashboardController);
+    dashboardController.$inject = ['dashboardService', 'securityService'];
+
+    function dashboardController(dashboardService, security) {
+        var vm = this;
+
+        function init() {
+            vm.title = 'Welcome to the User Portal AngularJS Boilerplate!';
+            vm.user = security.getCurrentUser();
+
+            dashboardService.getDashData(vm.user.userId).then(function (d) {
+                vm.dashData = d;
+            });
+        }
+
+        init();
+    }
+})(angular.module('app'));
+
 
 // *Note: separate this service to it's own file 'dashboard.service.js' after adding more code.
-angular.module('app').factory('dashboardService', ['$http', 'services.utilities',
-  function ($http, utils) {
+(function () {
+    angular
+        .module('app')
+        .factory('dashboardService', dashboardService);
 
-      // Simply displaying how a service can be used to get data to a controller.
-      var service = {
+    dashboardService.$inject = ['$http', 'commonService'];
 
-          getDashData: function (userId) {
-              if (userId && userId > 0) {
+    function dashboardService($http, commonService) {
 
-                  var dashData = {
-                      totalHits: 25,
-                      totalShares: 6
-                  };
+        return {
+            getDashData: getDashData
+        };
 
-                  // Return as a promise.
-                  return utils.setAsPromise(dashData);
-              }
-          }
-      };
+        function getDashData(userId) {
+            if (userId && userId > 0) {
 
-      return service;
-  }
-]);
-angular.module('app').controller('profileCtrl', ['$scope', 'security.service',
-  function ($scope, security) {
-      $scope.user = security.requestCurrentUser();
-  }
-]);
-angular.module('app').controller('registerCtrl', ['$scope', 'registerService', '$modalInstance',
-  function ($scope, svc, $modalInstance) {
-      $scope.user = {};
+                var dashData = {
+                    totalHits: 25,
+                    totalShares: 6
+                };
 
-      $scope.register = function () {
-          $scope.dataLoading = true;
-          if (svc.createUser($scope.user)) {
-              $scope.registerMsg = 'Your account has been created! You can now login.';
-              $scope.registerMsgClass = 'alert-success';
-          } else {
-              $scope.registerMsg = 'Registration failed. Please try again.';
-              $scope.registerMsgClass = 'alert-danger';
-              $scope.dataLoading = false;
-          }
-      };
-
-      $scope.close = function () {
-          $modalInstance.close();
-      };
-  }
-]);
-
-// *Note: separate this service to it's own file 'register.service.js' after adding more code.
-angular.module('app').factory('registerService', ['$http', '$q', 'services.utilities',
-  function ($http, $q, utils) {
-
-      var service = {
-
-          createUser: function (user) {
-              if (user && user.email && user.password) {
-                  return true;
-                  // ToDo:
-                  //$http.post('/create-user', { user: user })
-                  //    .then(function success(response) {
-                  //        return true;
-                  //    },
-                  //    function error(response) {
-                  //        utils.handleApiError(response);
-                  //        return false;
-                  //    });
-              }
-          }
-      };
-
-      return service;
-  }
-]);
-angular.module('app').factory('security.service', ['$http', 'services.utilities',
-  function ($http, utils) {
-
-      var service = {
-
-          currentUser: null, // Information about the current user
-
-          // Attempt to authenticate a user by the given email and password
-          login: function (email, password) {
-              // ToDo: call API
-              //$http.post('/login', { email: email, password: password });
-
-              return $http.get('/client/test/sampleData/user.json')
-                  .then(function success(response) {
-                      service.currentUser = response.data;
-                      if (service.isAuthenticated()) {
-                          utils.navigateTo('#/');
-                      }
-                      return service.isAuthenticated();
-                  },
-                  function error(response) {
-                      utils.handleApiError(response);
-                      return false;
-                  });
-          },
-
-          // Logout the current user and redirect
-          logout: function () {
-              // ToDo: call API
-              //$http.post('/logout').then(function () {
-                  service.currentUser = null;
-                  utils.navigateTo('/login');
-              //});
-          },
-
-          sendPswdRecoveryEmail: function (email) {
-              return true;
-              // ToDo: call API
-              //$http.get('/password-recovery', { email: email })
-          },
-
-          // Ask the backend to see if a user is already authenticated - this may be from a previous session.
-          requestCurrentUser: function () {
-              if (service.isAuthenticated()) {
-                  return service.currentUser;
-              }
-              // ToDo:
-              //else {
-              //    return $http.get('/current-user').then(function (response) {
-              //        service.currentUser = response.data.user;
-              //        return service.currentUser;
-              //    });
-              //}
-          },
-
-          // Is the current user authenticated?
-          isAuthenticated: function () {
-              return !!service.currentUser;
-          }
-      };
-
-      return service;
-  }
-]);
-angular.module('app').controller('loginCtrl', ['$scope', 'security.service', '$modal',
-  function ($scope, security, $modal) {
-      $('#loginModal').modal('show');
-      $scope.user = {
-          email: 'fake@myemail.com',  // ToDo: remove
-          password: 'pa$$word'  // ToDo: remove
-      };
-      $scope.forgotPass = {};
-
-      $scope.login = function () {
-          $scope.dataLoading = true;
-          if (security.login($scope.user.email, $scope.user.password)) {
-              $('#loginModal').modal('hide');
-          } else {
-              $scope.loginMsg = 'Login failed. Please try again.';
-              $scope.dataLoading = false;
-          }
-      };
-
-      $scope.forgotPassword = function () {
-          if (security.sendPswdRecoveryEmail($scope.forgotPass.email)) {
-              $scope.forgotPassMsg = 'A password recovery email has been sent.';
-              $scope.forgotPassMsgClass = 'alert-success';
-          } else {
-              $scope.forgotPassMsg = 'Form submission error. Please try again.';
-              $scope.forgotPassMsgClass = 'alert-danger';
-          }
-      };
-
-      $scope.openRegister = function () {
-          var modalInstance = $modal.open({
-              //scope: $scope,
-              templateUrl: '/client/app/account/register.tpl.html',
-              controller: 'registerCtrl'
-          });
-      };
-  }
-]);
-angular.module('app').factory('services.utilities', ['$rootScope', '$q', '$window', '$location', '$anchorScroll', '$modal',
-  function ($rootScope, $q, $window, $location, $scroll, $modal) {
-
-      var service = {
-          rootLocationPath: '/client/#',
-          pageWidth: $window.innerWidth,
-
-          navigateTo: function (path) {
-              $location.path(path);
-          },
-
-          pageRedirect: function (path) {
-              if (path)
-                  $window.location.href = path;
-              else
-                  $window.location.href = service.rootLocationPath + $location.$$path;
-          },
-
-          goBack: function () {
-              $window.history.back();
-          },
-
-          anchorScroll: function (anchor) {
-              $location.hash(anchor);
-              $scroll();
-          },
-
-          setAsPromise: function (object) {
-              var deferred = $q.defer();
-              deferred.resolve(object);
-              return deferred.promise;
-          },
-
-          handleApiError: function (response) {
-              if (response) {
-                  var errorMessage = response.statusText + ' (Error Code: ' + response.status + ')';
-                  if (response.data != null && response.data.message != null)
-                      errorMessage += '<br/><br/>' + response.data.message;
-                  service.showModalMessage(errorMessage, 'danger', null);
-                  console.log(errorMessage); 
-              }
-          },
-
-          showModalMessage: function (message, type, title, size)  {
-              $rootScope.modalTitle = title;
-              $rootScope.modalMessage = message;
-              $rootScope.type = type; // warning, danger, (theme default)
-              size = (!size) ? '' : size;
-
-              var modalInstance = $modal.open({
-                  scope: $rootScope,
-                  templateUrl: '/client/common/templates/modalMessage.tpl.html',
-                  controller: 'modalMessageCtrl',
-                  backdrop: 'static', // makes it truly modal so clicks outside the modal don't close it
-                  size: size // sm, md, lg
-              });
-          }
-      };
-
-      return service;
-  }
-]);
-angular.module('app').controller('modalMessageCtrl', function ($scope, $modalInstance) {
-
-    switch ($scope.type) {
-        case 'warning':
-            $scope.modalContentClass = 'alert-warning';
-            $scope.modalHeaderClass = 'modal-header-warning';
-
-            if (!$scope.modalTitle)
-                $scope.modalTitle = "Warning";
-            break;
-        case 'danger':
-            $scope.modalContentClass = 'alert-danger';
-            $scope.modalHeaderClass = 'modal-header-danger';
-
-            if (!$scope.modalTitle)
-                $scope.modalTitle = "Error";
-            break;
-        default:
-            if (!$scope.modalTitle)
-                $scope.modalTitle = "Information";
-            break;
+                // Return as a promise.
+                return commonService.setDeferredPromise(dashData);
+            }
+        }
     }
-
-    $scope.close = function () {
-        $modalInstance.close();
-    };
-});
+})();

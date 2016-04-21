@@ -7,8 +7,8 @@
     <meta name="description" content="">
     <title>User Portal</title>
 
-    <link href="assets/css/style-bundle.min.css" rel="stylesheet">
-    <link rel="icon" type="image/png" href="assets/img/favicon.ico">
+    <link href="content/css/style-bundle.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="content/img/favicon.ico">
 
     <!-- HTML5 shim and Respond.js for IE support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -18,11 +18,11 @@
     <![endif]-->
 </head>
 
-<body ng-controller="baseCtrl" ng-class="{ 'login-body': !isAuthenticated }">
+<body ng-controller="baseController as vm" ng-class="{ 'login-body': !vm.isAuthenticated }">
 
-    <section id="container" ng-class="{ 'sidebar-closed': isSidebarClosed }">
-        <div ng-include="'common/layout/header.tpl.html'" ng-show="isAuthenticated"></div>
-        <div ng-include="'common/layout/sidebar.tpl.html'" ng-show="isAuthenticated"></div>
+    <section id="container" ng-class="{ 'sidebar-closed': vm.isSidebarClosed }">
+        <div ng-include="'app/views/layout/header.tpl.html'" ng-show="vm.isAuthenticated"></div>
+        <div ng-include="'app/views/layout/sidebar.tpl.html'" ng-show="vm.isAuthenticated"></div>
 
         <section id="main-content">
             <a id="scrollTop">.</a>
@@ -33,7 +33,7 @@
             </section>
         </section>
 
-        <div ng-include="'common/layout/footer.tpl.html'" ng-show="isAuthenticated"></div>
+        <div ng-include="'app/views/layout/footer.tpl.html'" ng-show="vm.isAuthenticated"></div>
     </section>
 
     <!-- scripts -->

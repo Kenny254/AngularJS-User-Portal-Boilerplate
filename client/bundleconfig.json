@@ -1,0 +1,38 @@
+/*
+   The Visual Studio "Bundler & Minifier" plugin
+   Source:  https://visualstudiogallery.msdn.microsoft.com/9ec27da7-e24b-4d56-8064-fd7e88ac1c40
+   *Tip: use Shift + Alt + i to build all bundles in the solution. (however, usually when you save changes it auto runs)
+*/
+
+[
+  // CSS
+  {
+    "outputFileName": "content/css/style-bundle.css",
+    "inputFiles": [
+      "vendor/bootstrap/bootstrap.min.css",
+      "vendor/font-awesome/css/font-awesome.css",
+      "vendor/fonts/ruda-font.css",
+      "content/css/style.css"
+    ]
+  },
+  // JavaScript
+  {
+    // vendor
+    "outputFileName": "vendor/vendor-bundle.js",
+    "inputFiles": [
+      "vendor/jquery/jquery.min.js",
+      "vendor/bootstrap/bootstrap.min.js",
+      "vendor/angular/angular.min.js",
+      "vendor/angular/angular-route.min.js",
+      "vendor/angular/angular-animate.min.js",
+      "vendor/bootstrap/ui-bootstrap-tpls-0.13.4.min.js"
+    ]
+  },
+  {
+    // app
+    "outputFileName": "app/app-bundle.js",
+    "inputFiles": [
+      "app/**/*.js"
+    ]
+  }
+]
